@@ -1,0 +1,44 @@
+{
+  "name": "instruct-sync",
+  "version": "0.1.0",
+  "description": "Share and sync GitHub Copilot instruction files across repos from a community registry",
+  "keywords": ["copilot", "instructions", "ai", "github", "sync", "cli"],
+  "license": "MIT",
+  "author": "zekariasasaminew",
+  "homepage": "https://github.com/zekariasasaminew/instruct-sync#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zekariasasaminew/instruct-sync.git"
+  },
+  "bugs": {
+    "url": "https://github.com/zekariasasaminew/instruct-sync/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "type": "module",
+  "main": "dist/cli.js",
+  "bin": {
+    "instruct-sync": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/cli.ts --format esm --dts --clean",
+    "dev": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "dependencies": {
+    "@octokit/rest": "^21.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.3.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}
