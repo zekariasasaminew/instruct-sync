@@ -25,7 +25,8 @@ export async function add(nameOrSource: string, flags: { tool?: string; target?:
     tools = (Object.keys(pack.targets) as ToolName[]).filter((t) => detected.includes(t));
     if (tools.length === 0) tools = ["copilot"]; // fallback
   } else {
-    tools = ["copilot"]; // v1 pack: copilot only
+    // v1/cross-tool pack: use pack.tool if specified, otherwise copilot
+    tools = [((pack.tool as ToolName) ?? "copilot")];
   }
 
   const installed: string[] = [];
@@ -62,13 +63,22 @@ export async function add(nameOrSource: string, flags: { tool?: string; target?:
   for (const line of installed) console.log(line);
   if (skipped.length > 0) console.log(`  Skipped (already installed): ${skipped.join(", ")}`);
 
-  if (installed.length > 0 && !flags.tool && !pack.targets) {
+  // Hint: show available tool variants that weren't installed
+  if (installed.length > 0 && !flags.tool && pack.targets) {
+    const notInstalled = (Object.keys(pack.targets) as ToolName[]).filter((t) => !tools.includes(t));
+    if (notInstalled.length > 0) {
+      console.log(`  Hint: ${notInstalled.join(", ")} variants also available. Run: instruct-sync add ${nameOrSource} --tool <tool>`);
+    }
+  } else if (installed.length > 0 && !flags.tool && !pack.targets && pack.tool !== "agents") {
     console.log(`  Hint: Run with --tool cursor|claude|windsurf to install for other tools`);
   }
 }
 
 async function addDirect(source: string, flags: { tool?: string; target?: string }): Promise<void> {
-  const name = source.split("/").pop()!.replace(/\.md$/, "").replace(/^github:/, "");
+  const name = source.split("/").pop()!
+    .replace(/@[^@]*$/, "")  // strip @ref (e.g. @HEAD, @v1.0.0)
+    .replace(/\.md$/, "")
+    .replace(/^github:/, "");
   const tool = (flags.tool as ToolName) ?? "copilot";
   const lockKey = `${name}@${tool}`;
 

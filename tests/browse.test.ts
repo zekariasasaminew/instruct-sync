@@ -15,7 +15,7 @@ describe("browse", () => {
     const output = spy.mock.calls.map((c) => c[0]).join("\n");
     expect(output).toContain("react");
     expect(output).toContain("typescript");
-    expect(output).toContain("2 pack(s) available");
+    expect(output).toContain("2 packs available");
     spy.mockRestore();
   });
 
