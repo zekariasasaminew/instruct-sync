@@ -8,7 +8,7 @@
   "homepage": "https://github.com/zekariasasaminew/instruct-sync#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zekariasasaminew/instruct-sync.git"
+    "url": "git+https://github.com/zekariasasaminew/instruct-sync.git"
   },
   "bugs": {
     "url": "https://github.com/zekariasasaminew/instruct-sync/issues"
