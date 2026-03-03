@@ -6,7 +6,7 @@ import { join } from "node:path";
 const mockLockfile = vi.hoisted(() => ({ readLockfile: vi.fn() }));
 vi.mock("../src/lockfile.js", () => mockLockfile);
 
-describe("list", () => {
+describe("installed", () => {
   let cwd: string;
   let originalCwd: string;
 
@@ -22,9 +22,9 @@ describe("list", () => {
 
   it("shows no packs message when lockfile is empty", async () => {
     mockLockfile.readLockfile.mockReturnValue({ packs: {} });
-    const { list } = await import("../src/commands/list.js");
+    const { installed } = await import("../src/commands/installed.js");
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
-    list();
+    installed();
     expect(spy).toHaveBeenCalledWith(expect.stringContaining("No packs installed"));
     spy.mockRestore();
   });
@@ -35,9 +35,9 @@ describe("list", () => {
         react: { source: "s", ref: "HEAD", sha: "abc", target: ".github/instructions/react.instructions.md", installedAt: "i" },
       },
     });
-    const { list } = await import("../src/commands/list.js");
+    const { installed } = await import("../src/commands/installed.js");
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
-    list();
+    installed();
     const output = spy.mock.calls.map((c) => c[0]).join("\n");
     expect(output).toContain("file missing");
     spy.mockRestore();
@@ -51,9 +51,9 @@ describe("list", () => {
     });
     mkdirSync(join(cwd, ".github/instructions"), { recursive: true });
     writeFileSync(join(cwd, ".github/instructions/react.instructions.md"), "# React");
-    const { list } = await import("../src/commands/list.js");
+    const { installed } = await import("../src/commands/installed.js");
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
-    list();
+    installed();
     const output = spy.mock.calls.map((c) => c[0]).join("\n");
     expect(output).not.toContain("file missing");
     spy.mockRestore();

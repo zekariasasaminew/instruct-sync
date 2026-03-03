@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { readLockfile } from "../lockfile.js";
 
-export function list(): void {
+export function installed(): void {
   const lock = readLockfile();
   const entries = Object.entries(lock.packs);
   if (entries.length === 0) {
