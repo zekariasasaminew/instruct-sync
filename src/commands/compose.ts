@@ -14,15 +14,21 @@ export function compose(): void {
     return;
   }
   const sections: string[] = [HEADER];
+  let composed = 0;
   for (const [name, entry] of entries) {
     const absPath = resolve(process.cwd(), entry.target);
     if (!existsSync(absPath)) {
-      console.warn(`  ⚠ skipping "${name}" — file not found at ${entry.target}`);
+      console.warn(`  ⚠ skipping "${name}" — file not found at ${entry.target}. Run: instruct-sync update`);
       continue;
     }
     const content = readFileSync(absPath, "utf8").trim();
     sections.push(`## ${name}\n\n${content}\n`);
+    composed++;
   }
   writeInstructions(sections.join("\n"), OUTPUT);
-  console.log(`✓ Composed ${entries.length} pack(s) → ${OUTPUT}`);
+  if (composed < entries.length) {
+    console.log(`✓ Composed ${composed} of ${entries.length} pack(s) → ${OUTPUT} (${entries.length - composed} skipped — run: instruct-sync update)`);
+  } else {
+    console.log(`✓ Composed ${composed} pack(s) → ${OUTPUT}`);
+  }
 }

@@ -1,9 +1,19 @@
 import { findPack } from "../registry.js";
 import { parseSource, fetchFile } from "../github.js";
 import { writeInstructions, defaultTarget } from "../writer.js";
-import { addEntry } from "../lockfile.js";
+import { readLockfile, addEntry } from "../lockfile.js";
 
 export async function add(nameOrSource: string): Promise<void> {
+  const name = nameOrSource.startsWith("github:")
+    ? nameOrSource.split("/").pop()!.replace(/\.md$/, "").replace(/^github:/, "")
+    : nameOrSource;
+
+  const existing = readLockfile().packs[name];
+  if (existing) {
+    console.log(`"${name}" is already installed at ${existing.target}. Run: instruct-sync update`);
+    return;
+  }
+
   let source: string;
 
   if (nameOrSource.startsWith("github:")) {
@@ -17,7 +27,6 @@ export async function add(nameOrSource: string): Promise<void> {
   console.log(`Fetching ${source}...`);
   const file = await fetchFile(parsed);
 
-  const name = nameOrSource.startsWith("github:") ? parsed.path.split("/").pop()!.replace(/\.md$/, "") : nameOrSource;
   const target = defaultTarget(name);
 
   writeInstructions(file.content, target);
