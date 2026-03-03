@@ -11,6 +11,8 @@ export interface RegistryEntry {
   description: string;
   /** v1 only — single source for all tools */
   source?: string;
+  /** v1 only — explicit target path (e.g. AGENTS.md) */
+  target?: string;
   /** v2 only — per-tool source+target */
   targets?: Partial<Record<ToolName, ToolTarget>>;
   /** if present, this pack is for one specific tool only */
