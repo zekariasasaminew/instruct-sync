@@ -59,6 +59,8 @@ react                claude       React 18+ best practices: hooks, component pat
 react                windsurf     React 18+ best practices: hooks, component patterns
 agents               agents       Cross-tool AGENTS.md for all AI agents
 ...
+
+6 packs available (21 variants). Run: instruct-sync add <name>
 ```
 
 ### `instruct-sync installed`
@@ -75,6 +77,15 @@ react                    cursor       .cursor/rules/react.mdc ⚠ file missing �
 ### `instruct-sync add <name>`
 
 Install a pack from the registry. By default, auto-detects which tools you're using and installs for all of them.
+
+```bash
+instruct-sync add react
+# Fetching github:...
+# ✓ Installed "react" → .github/instructions/react.instructions.md (copilot)
+#   Hint: cursor, claude, windsurf variants also available. Run: instruct-sync add react --tool <tool>
+```
+
+When tools are auto-detected (e.g. `.cursor/` directory exists):
 
 ```bash
 instruct-sync add react
@@ -144,7 +155,7 @@ When you run `instruct-sync add <pack>`, it checks which AI tools are present in
 If none of the optional signals are found, only the Copilot variant is installed and a hint is shown:
 ```
 ✓ Installed "react" → .github/instructions/react.instructions.md (copilot)
-  Hint: Run with --tool cursor|claude|windsurf to install for other tools
+  Hint: cursor, claude, windsurf variants also available. Run: instruct-sync add react --tool <tool>
 ```
 
 ## Community registry
@@ -158,7 +169,7 @@ If none of the optional signals are found, only the Copilot variant is installed
 | `typescript` | Strict mode, type patterns, null handling |
 | `python` | PEP 8, type hints, async, pytest |
 | `go` | Project layout, error handling, interfaces, concurrency |
-| `agents` | Cross-tool AGENTS.md for all AI agents |
+| `agents` | Cross-tool AGENTS.md for all AI agents (installs to `AGENTS.md` at repo root) |
 
 Packs are hosted at [instruct-sync-registry](https://github.com/zekariasasaminew/instruct-sync-registry). To contribute a pack, open a PR there — add a `.md` file to `packs/` and an entry to `registry.json`.
 
