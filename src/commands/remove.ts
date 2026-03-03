@@ -17,6 +17,7 @@ export function remove(name: string, flags: { tool?: string } = {}): void {
 
   if (keysToRemove.length === 0) {
     console.log(`"${name}" is not installed. Run: instruct-sync installed`);
+    process.exitCode = 1;
     return;
   }
 
