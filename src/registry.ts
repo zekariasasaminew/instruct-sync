@@ -23,7 +23,7 @@ export async function findPack(name: string): Promise<RegistryEntry> {
  */
 export function getToolTarget(pack: RegistryEntry, tool: ToolName): ToolTarget | undefined {
   if (pack.targets?.[tool]) return pack.targets[tool];
-  // v1 fallback: single source, derive default target path
-  if (pack.source) return { source: pack.source, target: "" }; // empty = use defaultTarget()
+  // v1/cross-tool pack: use pack-level source + target
+  if (pack.source) return { source: pack.source, target: pack.target ?? "" };
   return undefined;
 }
