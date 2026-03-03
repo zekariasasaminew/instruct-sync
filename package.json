@@ -1,6 +1,6 @@
 {
   "name": "instruct-sync",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Share and sync GitHub Copilot instruction files across repos from a community registry",
   "keywords": [
     "copilot",
