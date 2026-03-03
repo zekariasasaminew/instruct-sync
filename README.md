@@ -49,6 +49,52 @@ Running `instruct-sync add <pack>` will:
 
 The `instruct-sync.json` lockfile pins exactly what you have installed. Running `instruct-sync update` compares the current SHA on GitHub against your locked SHA — if they differ it re-fetches, if they match it skips. Updates are always opt-in.
 
+## Common scenarios
+
+**File was deleted — restore it**
+
+If you accidentally delete an instruction file, `instruct-sync list` will warn you:
+
+```
+react  HEAD  .github/instructions/react.instructions.md ⚠ file missing — run: instruct-sync update
+```
+
+Run `instruct-sync update` to restore all missing files. Even if the remote content hasn't changed (same SHA), it will re-write the file with `✓ restored`.
+
+**Add a pack that's already installed**
+
+```bash
+instruct-sync add react
+# "react" is already installed at .github/instructions/react.instructions.md. Run: instruct-sync update
+```
+
+Use `instruct-sync update` to pull the latest version, not `add`.
+
+**Remove a pack**
+
+There is no `remove` command yet. To remove a pack manually:
+1. Delete the file (e.g. `.github/instructions/react.instructions.md`)
+2. Remove the entry from `instruct-sync.json`
+
+**Compose with missing files**
+
+If some files are missing when you run `instruct-sync compose`, they are skipped and you get a clear count:
+
+```
+✓ Composed 2 of 3 pack(s) → .github/copilot-instructions.md (1 skipped — run: instruct-sync update)
+```
+
+Run `instruct-sync update` first to restore any missing files, then `compose` again.
+
+**Upgrade instruct-sync itself**
+
+```bash
+npm install -g instruct-sync@latest
+```
+
+`npm install -g instruct-sync` without `@latest` will keep the cached version.
+
+
 ## Private repos
 
 For private repos, set a GitHub token with read access:

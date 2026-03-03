@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { readLockfile } from "../lockfile.js";
 import { parseSource, fetchFile } from "../github.js";
 import { writeInstructions } from "../writer.js";
@@ -16,12 +18,13 @@ export async function update(): Promise<void> {
     parsed.ref = entry.ref;
     console.log(`Updating "${name}"...`);
     const file = await fetchFile(parsed);
-    if (file.sha === entry.sha) {
+    const fileExists = existsSync(resolve(process.cwd(), entry.target));
+    if (file.sha === entry.sha && fileExists) {
       console.log(`  already up to date`);
     } else {
       writeInstructions(file.content, entry.target);
       addEntry(name, { ...entry, sha: file.sha, installedAt: new Date().toISOString() });
-      console.log(`  ✓ updated`);
+      console.log(fileExists ? `  ✓ updated` : `  ✓ restored`);
     }
   }
 }
