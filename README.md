@@ -1,114 +1,155 @@
 # instruct-sync
 
-> Share and sync GitHub Copilot instruction files across repos — install community packs or pull from any private GitHub repo, with version pinning and no local cloning required.
+> Install and sync AI instruction files for GitHub Copilot, Cursor, Claude Code, Windsurf, and Cline — from a community registry or any private GitHub repo, with version pinning and no local cloning required.
 
 [![npm](https://img.shields.io/npm/v/instruct-sync)](https://www.npmjs.com/package/instruct-sync)
 [![CI](https://github.com/zekariasasaminew/instruct-sync/actions/workflows/ci.yml/badge.svg)](https://github.com/zekariasasaminew/instruct-sync/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+## What it does
+
+Every AI coding tool has its own instruction file format and location:
+
+| Tool | File | Location |
+|---|---|---|
+| GitHub Copilot | `*.instructions.md` | `.github/instructions/` |
+| Cursor | `*.mdc` | `.cursor/rules/` |
+| Claude Code | `*.md` | `.claude/rules/` |
+| Windsurf | `*.md` | `.windsurf/rules/` |
+| All tools | `AGENTS.md` | repo root |
+
+`instruct-sync` lets you install community instruction packs once — it automatically writes them to the right place for every tool you're using. Think of it as **npm for AI instruction files**.
+
 ## Install
 
 ```bash
 npm install -g instruct-sync
-# or use directly without installing
+# or use without installing
 npx instruct-sync add react
 ```
 
-## Usage
+## Quick start
 
 ```bash
-# Install a pack from the community registry
-instruct-sync add react
-
-# Install from any GitHub repo at a specific ref (public or private)
-instruct-sync add github:owner/repo/path/to/file.md@v1.0.0
-
-# Pin to a branch (always gets latest on update)
-instruct-sync add github:owner/repo/path/to/file.md@main
-
-# Pin to a commit SHA (never changes)
-instruct-sync add github:owner/repo/path/to/file.md@a3f9c12
-
-# Update all installed packs
-instruct-sync update
-
-# List installed packs
+# Browse available packs
 instruct-sync list
 
-# Merge all installed packs into one .github/copilot-instructions.md
-instruct-sync compose
+# Install a pack — auto-detects Cursor, Claude, Windsurf and installs for each
+instruct-sync add react
+
+# See what's installed in this repo
+instruct-sync installed
+
+# Update all installed packs to latest
+instruct-sync update
 ```
 
-## How it works
+## Commands
 
-Running `instruct-sync add <pack>` will:
-1. Look up the pack in the community registry (or parse the `github:` source directly)
-2. Fetch the file content from GitHub via the API — no cloning required
-3. Write it to `.github/instructions/<name>.instructions.md`
-4. Record the source, ref, and SHA in `instruct-sync.json`
+### `instruct-sync list`
 
-The `instruct-sync.json` lockfile pins exactly what you have installed. Running `instruct-sync update` compares the current SHA on GitHub against your locked SHA — if they differ it re-fetches, if they match it skips. Updates are always opt-in.
-
-## Common scenarios
-
-**File was deleted — restore it**
-
-If you accidentally delete an instruction file, `instruct-sync list` will warn you:
+Browse available packs in the community registry.
 
 ```
-react  HEAD  .github/instructions/react.instructions.md ⚠ file missing — run: instruct-sync update
+Pack                 Tool         Description
+──────────────────── ──────────── ────────────────────────────────────────────────────
+react                copilot      React 18+ best practices: hooks, component patterns
+react                cursor       React 18+ best practices: hooks, component patterns
+react                claude       React 18+ best practices: hooks, component patterns
+react                windsurf     React 18+ best practices: hooks, component patterns
+agents               agents       Cross-tool AGENTS.md for all AI agents
+...
 ```
 
-Run `instruct-sync update` to restore all missing files. Even if the remote content hasn't changed (same SHA), it will re-write the file with `✓ restored`.
+### `instruct-sync installed`
 
-**Add a pack that's already installed**
+Show packs installed in this repo with their targets and status.
+
+```
+Pack                     Tool         Target
+──────────────────────── ──────────── ────────────────────────────────────────────────────
+react                    copilot      .github/instructions/react.instructions.md
+react                    cursor       .cursor/rules/react.mdc ⚠ file missing — run: instruct-sync update
+```
+
+### `instruct-sync add <name>`
+
+Install a pack from the registry. By default, auto-detects which tools you're using and installs for all of them.
 
 ```bash
 instruct-sync add react
-# "react" is already installed at .github/instructions/react.instructions.md. Run: instruct-sync update
+# ✓ Installed "react" → .github/instructions/react.instructions.md (copilot)
+# ✓ Installed "react" → .cursor/rules/react.mdc (cursor)
 ```
 
-Use `instruct-sync update` to pull the latest version, not `add`.
-
-**Remove a pack**
-
-There is no `remove` command yet. To remove a pack manually:
-1. Delete the file (e.g. `.github/instructions/react.instructions.md`)
-2. Remove the entry from `instruct-sync.json`
-
-**Compose with missing files**
-
-If some files are missing when you run `instruct-sync compose`, they are skipped and you get a clear count:
-
-```
-✓ Composed 2 of 3 pack(s) → .github/copilot-instructions.md (1 skipped — run: instruct-sync update)
+**Install for a specific tool only:**
+```bash
+instruct-sync add react --tool cursor
 ```
 
-Run `instruct-sync update` first to restore any missing files, then `compose` again.
+**Install from any GitHub repo (public or private):**
+```bash
+instruct-sync add github:owner/repo/path/to/file.md@v1.0.0
+instruct-sync add github:owner/repo/path/to/file.md@main
+instruct-sync add github:owner/repo/path/to/file.md@a3f9c12
+```
 
-**Upgrade instruct-sync itself**
+**Override the install path:**
+```bash
+instruct-sync add github:owner/repo/my-rules.md@main --target AGENTS.md
+```
+
+### `instruct-sync update`
+
+Re-fetch all installed packs. Skips packs where the remote SHA hasn't changed, unless the file is missing (restores it).
+
+```
+Updating "react@copilot"...
+  ✓ already up to date
+Updating "react@cursor"...
+  ✓ restored
+```
+
+### `instruct-sync remove <name>`
+
+Remove a pack — deletes the file from disk and removes it from the lockfile.
 
 ```bash
-npm install -g instruct-sync@latest
+instruct-sync remove react              # removes all tool variants
+instruct-sync remove react --tool cursor  # removes cursor variant only
 ```
 
-`npm install -g instruct-sync` without `@latest` will keep the cached version.
+### `instruct-sync compose [--output <file>]`
 
-
-## Private repos
-
-For private repos, set a GitHub token with read access:
+Merge all installed pack files into a single output file (useful for tools that use one combined file).
 
 ```bash
-$env:GITHUB_TOKEN = "ghp_your_token"
-instruct-sync add github:your-org/private-repo/instructions/backend.md@main
+instruct-sync compose                          # → .github/copilot-instructions.md
+instruct-sync compose --output CLAUDE.md       # → CLAUDE.md
+instruct-sync compose --output AGENTS.md       # → AGENTS.md
 ```
 
-Access is controlled entirely by GitHub — if the token doesn't have read access to the repo, the fetch fails.
+## Tool auto-detection
+
+When you run `instruct-sync add <pack>`, it checks which AI tools are present in your repo:
+
+| Signal | Tool detected |
+|--------|--------------|
+| `.cursor/` directory | Cursor |
+| `CLAUDE.md` or `.claude/` | Claude Code |
+| `.windsurf/` or `.windsurfrules` | Windsurf |
+| `.clinerules` | Cline |
+| (always) | Copilot |
+
+If none of the optional signals are found, only the Copilot variant is installed and a hint is shown:
+```
+✓ Installed "react" → .github/instructions/react.instructions.md (copilot)
+  Hint: Run with --tool cursor|claude|windsurf to install for other tools
+```
 
 ## Community registry
 
-5 seed packs are available out of the box:
+6 packs are available out of the box, each with copilot, cursor, claude, and windsurf variants:
 
 | Pack | Description |
 |------|-------------|
@@ -117,28 +158,83 @@ Access is controlled entirely by GitHub — if the token doesn't have read acces
 | `typescript` | Strict mode, type patterns, null handling |
 | `python` | PEP 8, type hints, async, pytest |
 | `go` | Project layout, error handling, interfaces, concurrency |
+| `agents` | Cross-tool AGENTS.md for all AI agents |
 
-Packs are hosted at [instruct-sync-registry](https://github.com/zekariasasaminew/instruct-sync-registry). To add your own pack, open a PR there — add a `.md` file to `packs/` and an entry to `registry.json`.
+Packs are hosted at [instruct-sync-registry](https://github.com/zekariasasaminew/instruct-sync-registry). To contribute a pack, open a PR there — add a `.md` file to `packs/` and an entry to `registry.json`.
+
+## Private repos
+
+Set a GitHub token with read access:
+
+```bash
+# PowerShell
+$env:GITHUB_TOKEN = "ghp_your_token"
+
+# bash/zsh
+export GITHUB_TOKEN="ghp_your_token"
+
+instruct-sync add github:your-org/private-repo/instructions/backend.md@main
+```
 
 ## Lockfile
 
-`instruct-sync.json` is created at your repo root:
+`instruct-sync.json` is created at your repo root. Commit it so your team stays on the same versions.
 
 ```json
 {
   "packs": {
-    "react": {
+    "react@copilot": {
       "source": "github:zekariasasaminew/instruct-sync-registry/packs/react.md",
       "ref": "HEAD",
       "sha": "abc123def456",
       "target": ".github/instructions/react.instructions.md",
+      "tool": "copilot",
+      "installedAt": "2026-03-03T00:00:00Z"
+    },
+    "react@cursor": {
+      "source": "github:zekariasasaminew/instruct-sync-registry/packs/react.md",
+      "ref": "HEAD",
+      "sha": "abc123def456",
+      "target": ".cursor/rules/react.mdc",
+      "tool": "cursor",
       "installedAt": "2026-03-03T00:00:00Z"
     }
   }
 }
 ```
 
-Commit this file so your whole team stays on the same instruction versions.
+## Troubleshooting
+
+**File was deleted — restore it**
+
+```
+react  copilot  .github/instructions/react.instructions.md ⚠ file missing — run: instruct-sync update
+```
+
+Run `instruct-sync update` to restore it. Even if the remote hasn't changed, it will re-write the file.
+
+**Pack already installed**
+
+```bash
+instruct-sync add react
+# "react" is already installed for: copilot. Run: instruct-sync update
+```
+
+**Upgrade instruct-sync itself**
+
+```bash
+npm install -g instruct-sync@latest
+```
+
+`npm install -g instruct-sync` without `@latest` keeps the cached version.
+
+**Compose with missing files**
+
+```
+✓ Composed 2 of 3 pack(s) → .github/copilot-instructions.md (1 skipped — run: instruct-sync update)
+```
+
+Run `instruct-sync update` first to restore missing files, then run `compose` again.
 
 ## Contributing
 
