@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { readLockfile } from "../lockfile.js";
 
 export function list(): void {
@@ -10,6 +12,8 @@ export function list(): void {
   console.log(`${"Pack".padEnd(20)} ${"Ref".padEnd(20)} ${"Target"}`);
   console.log(`${"─".repeat(20)} ${"─".repeat(20)} ${"─".repeat(40)}`);
   for (const [name, entry] of entries) {
-    console.log(`${name.padEnd(20)} ${entry.ref.padEnd(20)} ${entry.target}`);
+    const exists = existsSync(resolve(process.cwd(), entry.target));
+    const status = exists ? "" : " ⚠ file missing — run: instruct-sync update";
+    console.log(`${name.padEnd(20)} ${entry.ref.padEnd(20)} ${entry.target}${status}`);
   }
 }
